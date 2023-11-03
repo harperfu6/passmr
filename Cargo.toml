@@ -9,3 +9,4 @@ edition = "2021"
 clap = { version = "4.4.7", features = ["derive"] }
 crossterm = "0.27.0"
 ratatui = "0.24.0"
+sled = "0.34.7"
