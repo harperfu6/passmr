@@ -5,27 +5,28 @@ pub struct Kvs {
 }
 
 impl Kvs {
-    pub fn new(file_path: String) -> Result<Kvs, String> {
+    pub fn new(file_path: &str) -> Result<Kvs, String> {
         let db = sled::open(file_path).map_err(|e| e.to_string())?;
         Ok(Kvs { db })
     }
 
-    pub fn insert(&self, key: String, value: String) {
+    pub fn insert(&self, key: &str, value: &str) {
         self.db.insert(key, value.as_bytes()).unwrap();
     }
 
-    pub fn get(&self, key: String) -> Option<String> {
+    pub fn get(&self, key: &str) -> Option<String> {
         self.db
             .get(key)
             .unwrap()
-            .map(|v| String::from_utf8(v.to_vec()).unwrap())
+            .map(|v| std::str::from_utf8(&v).unwrap().to_string())
     }
 
     pub fn get_key_vec(&self) -> Vec<String> {
         self.db
             .iter()
             .keys()
-            .map(|v| String::from_utf8(v.unwrap().to_vec()).unwrap())
+            .map(|k| k.unwrap().to_vec())
+            .map(|k| String::from_utf8(k).unwrap())
             .collect()
     }
 
@@ -36,7 +37,7 @@ impl Kvs {
 
 impl Default for Kvs {
     fn default() -> Self {
-        Self::new("/tmp/passmr/kvs".to_string()).unwrap()
+        Self::new("/tmp/passmr/kvs").unwrap()
     }
 }
 
@@ -47,10 +48,10 @@ mod tests {
     #[test]
     fn test_insert() {
         let file_path = "/tmp/passmr/test_insert";
-        let kvs = Kvs::new(file_path.to_string()).unwrap();
+        let kvs = Kvs::new(file_path).unwrap();
         let key = "key";
         let value = "value";
-        kvs.insert(key.to_string(), value.to_string());
-        assert_eq!(kvs.get("key".to_string()), Some("value".to_string()));
+        kvs.insert(key, value);
+        assert_eq!(kvs.get("key"), Some("value".to_string()));
     }
 }

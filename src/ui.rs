@@ -17,6 +17,7 @@ pub fn ui(frame: &mut Frame, app: &mut App) {
     let mode_text = match app.mode {
         InputMode::Normal => "Normal / press 'a' to add, 's' to search, 'q' to quit",
         InputMode::Search => "Search / press 'Esc' to exit search",
+        InputMode::Select => "Select / press 'Esc' to exit select",
         InputMode::AddKey | InputMode::AddValue => "press 'Esc' to exit add",
     };
     let mut text = Text::from(Line::from(mode_text));
@@ -36,12 +37,43 @@ pub fn ui(frame: &mut Frame, app: &mut App) {
             chunks[1].x + app.cursor_position as u16 + 1,
             chunks[1].y + 1,
         );
-        let key_vec = app.get_key_vec();
-        let key_list = List::new(key_vec)
+
+        let key_list = app.get_key_list();
+        let list_items = key_list
+            .items
+            .iter()
+            .map(|i| {
+                let i_str = i.as_str();
+                let lines = vec![Line::from(i_str)];
+                ListItem::new(lines)
+            })
+            .collect::<Vec<ListItem>>();
+        let ui_key_list = List::new(list_items)
             .block(Block::default().borders(Borders::ALL).title("List"))
             .highlight_style(Style::default().add_modifier(Modifier::BOLD))
             .highlight_symbol(">> ");
-        frame.render_stateful_widget(key_list, chunks[2], &mut app.key_list.state);
+
+        let mut_key_list = app.get_mut_key_list();
+        frame.render_stateful_widget(ui_key_list, chunks[2], &mut mut_key_list.state);
+    }
+
+    if let InputMode::Select = app.mode {
+        let key_list = app.get_key_list();
+        let list_items = key_list
+            .items
+            .iter()
+            .map(|i| {
+                let i_str = i.as_str();
+                let lines = vec![Line::from(i_str)];
+                ListItem::new(lines)
+            })
+            .collect::<Vec<ListItem>>();
+        let ui_key_list = List::new(list_items)
+            .block(Block::default().borders(Borders::ALL).title("List"))
+            .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+            .highlight_symbol(">> ");
+
+        frame.render_stateful_widget(ui_key_list, chunks[2], &mut app.key_list.state);
     }
 
     if let InputMode::AddKey = app.mode {

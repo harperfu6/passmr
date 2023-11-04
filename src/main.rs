@@ -8,6 +8,7 @@ use crossterm::{
 use ratatui::prelude::*;
 
 use crate::app::{run_app, App};
+use crate::kvs::Kvs;
 
 mod app;
 mod kvs;
@@ -21,8 +22,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut app = App::default();
-    run_app(&mut terminal, &mut app)?;
+    let mut kvs = Kvs::default();
+    let mut app = App::new();
+    app.insert_key_list(kvs.get_key_vec());
+    run_app(&mut terminal, &mut app, &mut kvs)?;
 
     // restore terminal
     disable_raw_mode()?;

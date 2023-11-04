@@ -10,10 +10,12 @@ use crate::ui::ui;
 pub enum InputMode {
     Normal,
     Search,
+    Select,
     AddKey,
     AddValue,
 }
 
+#[derive(Debug, Clone)]
 pub struct StatefulList<T> {
     pub state: ListState,
     pub items: Vec<T>,
@@ -57,12 +59,12 @@ impl<T> StatefulList<T> {
 }
 
 /// holds the state of the application
-pub struct App<'a> {
+// pub struct App<'a> {
+pub struct App {
     /// search input in search mode
     pub search_input: String,
     /// list of stored keys
-    pub key_list: StatefulList<&'a str>,
-
+    pub key_list: StatefulList<String>,
     /// key input in add mode
     pub key_input: String,
     /// value input in add mode
@@ -73,29 +75,45 @@ pub struct App<'a> {
 
     /// current mode of the app
     pub mode: InputMode,
-
-    /// key value store
-    pub kvs: Kvs,
 }
 
-impl<'a> Default for App<'a> {
-    fn default() -> Self {
+// impl<'a> App<'a> {
+impl App {
+    pub fn new() -> Self {
         Self {
             search_input: String::new(),
-            key_list: StatefulList {
-                state: ListState::default(),
-                items: vec![],
-            },
             key_input: String::new(),
+            key_list: StatefulList::with_items(vec![]),
             value_input: String::new(),
             cursor_position: 0,
             mode: InputMode::Normal,
-            kvs: Kvs::default(),
         }
     }
-}
 
-impl<'a> App<'a> {
+    pub fn get_key_list(&self) -> StatefulList<String> {
+        self.key_list.to_owned()
+    }
+
+    pub fn get_mut_key_list(&mut self) -> &mut StatefulList<String> {
+        &mut self.key_list
+    }
+
+    pub fn insert_key_list(&mut self, key_list: Vec<String>) {
+        self.key_list = StatefulList::with_items(key_list);
+    }
+
+    fn add_to_kvs(&mut self, kvs: &Kvs) {
+        if !self.key_input.is_empty() && !self.value_input.is_empty() {
+            kvs.insert(&self.key_input, &self.value_input);
+
+            // TODO: update key_list as well
+
+            self.key_input.clear();
+            self.value_input.clear();
+            self.mode = InputMode::Normal;
+        }
+    }
+
     fn move_cursor_right(&mut self) {
         let cursor_moved_right = self.cursor_position.saturating_add(1);
         self.cursor_position = self.clamp_cursor_position(cursor_moved_right);
@@ -156,30 +174,13 @@ impl<'a> App<'a> {
             _ => {}
         }
     }
-
-    fn add_to_kvs(&mut self) {
-        if !self.key_input.is_empty() && !self.value_input.is_empty() {
-            self.kvs
-                .insert(self.key_input.clone(), self.value_input.clone());
-
-            self.key_input.clear();
-            self.value_input.clear();
-            self.mode = InputMode::Normal;
-        }
-    }
-
-    pub fn get_key_vec(&self) -> Vec<ListItem<'a>> {
-        let key_str_vec = self.kvs.get_key_vec();
-        let stateful_items = StatefulList::with_items(key_str_vec);
-        stateful_items
-            .items
-            .iter()
-            .map(|i| ListItem::new(i.clone()))
-            .collect()
-    }
 }
 
-pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<()> {
+pub fn run_app<B: Backend>(
+    terminal: &mut Terminal<B>,
+    app: &mut App,
+    kvs: &mut Kvs,
+) -> io::Result<()> {
     loop {
         terminal.draw(|frame| ui(frame, app))?;
 
@@ -206,8 +207,24 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Res
                     KeyCode::Backspace => {
                         app.delete_char();
                     }
+                    KeyCode::Enter => {
+                        app.mode = InputMode::Select;
+                        app.key_list.state.select(Some(0));
+                    }
                     KeyCode::Char(to_insert) => {
                         app.enter_char(to_insert);
+                    }
+                    _ => {}
+                },
+                InputMode::Select => match key.code {
+                    KeyCode::Esc => {
+                        app.mode = InputMode::Normal;
+                    }
+                    KeyCode::Down => {
+                        app.key_list.next();
+                    }
+                    KeyCode::Up => {
+                        app.key_list.previous();
                     }
                     _ => {}
                 },
@@ -235,7 +252,7 @@ pub fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Res
                         app.delete_char();
                     }
                     KeyCode::Enter => {
-                        app.add_to_kvs();
+                        app.add_to_kvs(kvs);
                     }
                     KeyCode::Char(to_insert) => {
                         app.enter_char(to_insert);
