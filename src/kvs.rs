@@ -1,6 +1,6 @@
 use sled;
 
-struct Kvs {
+pub struct Kvs {
     db: sled::Db,
 }
 
@@ -21,8 +21,22 @@ impl Kvs {
             .map(|v| String::from_utf8(v.to_vec()).unwrap())
     }
 
+    pub fn get_key_vec(&self) -> Vec<String> {
+        self.db
+            .iter()
+            .keys()
+            .map(|v| String::from_utf8(v.unwrap().to_vec()).unwrap())
+            .collect()
+    }
+
     pub fn delete(&self, key: String) {
         self.db.remove(key).unwrap();
+    }
+}
+
+impl Default for Kvs {
+    fn default() -> Self {
+        Self::new("/tmp/passmr/kvs".to_string()).unwrap()
     }
 }
 

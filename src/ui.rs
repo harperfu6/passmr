@@ -3,7 +3,7 @@ use ratatui::widgets::*;
 
 use crate::app::{App, InputMode};
 
-pub fn ui(frame: &mut Frame, app: &App) {
+pub fn ui(frame: &mut Frame, app: &mut App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -28,7 +28,6 @@ pub fn ui(frame: &mut Frame, app: &App) {
     frame.render_widget(message, chunks[0]);
 
     if let InputMode::Search = app.mode {
-        // search input
         let search = Paragraph::new(app.search_input.as_str())
             .style(Style::default().fg(Color::White))
             .block(Block::default().borders(Borders::ALL).title("Search"));
@@ -37,10 +36,12 @@ pub fn ui(frame: &mut Frame, app: &App) {
             chunks[1].x + app.cursor_position as u16 + 1,
             chunks[1].y + 1,
         );
-        let list = Paragraph::new("")
-            .style(Style::default().fg(Color::White))
-            .block(Block::default().borders(Borders::ALL).title("List"));
-        frame.render_widget(list, chunks[2]);
+        let key_vec = app.get_key_vec();
+        let key_list = List::new(key_vec)
+            .block(Block::default().borders(Borders::ALL).title("List"))
+            .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+            .highlight_symbol(">> ");
+        frame.render_stateful_widget(key_list, chunks[2], &mut app.key_list.state);
     }
 
     if let InputMode::AddKey = app.mode {

@@ -21,8 +21,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let app = App::default();
-    run_app(&mut terminal, app)?;
+    let mut app = App::default();
+    run_app(&mut terminal, &mut app)?;
 
     // restore terminal
     disable_raw_mode()?;
