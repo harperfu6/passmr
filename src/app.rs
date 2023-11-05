@@ -1,5 +1,6 @@
 use std::io;
 
+use clipboard::{ClipboardContext, ClipboardProvider};
 use crossterm::event::{self, Event, KeyCode};
 use ratatui::prelude::*;
 use ratatui::widgets::*;
@@ -89,8 +90,6 @@ impl App {
         }
     }
 
-    // search時はリストを更新し、select時は更新しないようにする
-
     pub fn get_target_key_list(&mut self) -> Vec<String> {
         let target_key_list: Vec<String> = self
             .key_list
@@ -118,6 +117,13 @@ impl App {
         match self.target_key_list.state.selected() {
             Some(i) => Some(self.target_key_list.items[i].to_owned()),
             None => None,
+        }
+    }
+
+    fn remove_from_kvs(&mut self, kvs: &Kvs) {
+        if let Some(key) = self.get_selected_key() {
+            kvs.delete(key);
+            self.sync_key_list(kvs.get_key_vec());
         }
     }
 
@@ -227,8 +233,10 @@ pub fn run_app<B: Backend>(
                         app.delete_char();
                     }
                     KeyCode::Enter => {
-                        app.mode = InputMode::Select;
-                        app.target_key_list.state.select(Some(0));
+                        if app.target_key_list.items.len() > 0 {
+                            app.mode = InputMode::Select;
+                            app.target_key_list.state.select(Some(0));
+                        }
                     }
                     KeyCode::Char(to_insert) => {
                         app.enter_char(to_insert);
@@ -239,11 +247,21 @@ pub fn run_app<B: Backend>(
                     KeyCode::Esc => {
                         app.mode = InputMode::Normal;
                     }
-                    KeyCode::Down => {
+                    KeyCode::Char('j') => {
                         app.target_key_list.next();
                     }
-                    KeyCode::Up => {
+                    KeyCode::Char('k') => {
                         app.target_key_list.previous();
+                    }
+                    KeyCode::Char('d') => {
+                        app.remove_from_kvs(kvs);
+                        app.mode = InputMode::Search;
+                    }
+                    KeyCode::Enter => {
+                        let selected_key = app.get_selected_key();
+                        let value = kvs.get(&selected_key.unwrap());
+                        let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
+                        ctx.set_contents(value.unwrap()).unwrap();
                     }
                     _ => {}
                 },

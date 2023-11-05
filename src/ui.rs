@@ -17,9 +17,9 @@ pub fn ui(frame: &mut Frame, app: &mut App, kvs: &mut Kvs) {
 
     // mode text
     let mode_text = match app.mode {
-        InputMode::Normal => "Normal / press 'a' to add, 's' to search, 'q' to quit",
-        InputMode::Search => "Search / press 'Esc' to exit search",
-        InputMode::Select => "Select / press 'Esc' to exit select",
+        InputMode::Normal => "Normal Mode: press 's' to search, 'a' to add, 'q' to quit",
+        InputMode::Search => "Search Mode: press 'Esc' to exit search",
+        InputMode::Select => "Select Mode: press 'Esc' to exit select",
         InputMode::AddKey | InputMode::AddValue => "press 'Esc' to exit add",
     };
     let mut text = Text::from(Line::from(mode_text));
