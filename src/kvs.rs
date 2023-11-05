@@ -1,3 +1,6 @@
+use std::path::PathBuf;
+
+use dirs;
 use sled;
 
 pub struct Kvs {
@@ -5,7 +8,7 @@ pub struct Kvs {
 }
 
 impl Kvs {
-    pub fn new(file_path: &str) -> Result<Kvs, String> {
+    pub fn new(file_path: &PathBuf) -> Result<Kvs, String> {
         let db = sled::open(file_path).map_err(|e| e.to_string())?;
         Ok(Kvs { db })
     }
@@ -37,7 +40,11 @@ impl Kvs {
 
 impl Default for Kvs {
     fn default() -> Self {
-        Self::new("/tmp/passmr/kvs").unwrap()
+        let home_dir = dirs::home_dir().unwrap();
+        let passmr_dir = home_dir.join(".passmr");
+        std::fs::create_dir_all(&passmr_dir).unwrap();
+
+        Kvs::new(&passmr_dir.join("kvs")).unwrap()
     }
 }
 
@@ -47,8 +54,12 @@ mod tests {
 
     #[test]
     fn test_insert() {
-        let file_path = "/tmp/passmr/test_insert";
-        let kvs = Kvs::new(file_path).unwrap();
+        let home_dir = dirs::home_dir().unwrap();
+        let passmr_dir = home_dir.join(".passmr");
+        std::fs::create_dir_all(&passmr_dir).unwrap();
+
+        let kvs = Kvs::new(&passmr_dir.join("test_kvs")).unwrap();
+
         let key = "key";
         let value = "value";
         kvs.insert(key, value);

@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut kvs = Kvs::default();
     let mut app = App::new();
-    app.insert_key_list(kvs.get_key_vec());
+    app.sync_key_list(kvs.get_key_vec());
     run_app(&mut terminal, &mut app, &mut kvs)?;
 
     // restore terminal
