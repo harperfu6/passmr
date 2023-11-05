@@ -251,7 +251,7 @@ pub fn run_app<B: Backend>(
                 },
                 InputMode::Select => match key.code {
                     KeyCode::Esc => {
-                        app.mode = InputMode::Normal;
+                        app.mode = InputMode::Search;
                     }
                     KeyCode::Char('j') | KeyCode::Down => {
                         app.target_key_list.next();
@@ -310,7 +310,7 @@ pub fn run_app<B: Backend>(
                 },
                 InputMode::AddValue => match key.code {
                     KeyCode::Esc => {
-                        app.mode = InputMode::Normal;
+                        app.mode = InputMode::AddKey;
                     }
                     KeyCode::Backspace => {
                         app.delete_char();

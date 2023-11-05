@@ -90,8 +90,10 @@ pub fn ui(frame: &mut Frame, app: &mut App, kvs: &mut Kvs) {
 
     let mode_text = match app.mode {
         InputMode::Normal => "Normal Mode: press 's' to search, 'a' to add, 'q' to quit",
-        InputMode::Search => "Search Mode: press 'Esc' to exit search",
-        InputMode::Select => "Select Mode: press 'Esc' to exit select",
+        InputMode::Search => "Search Mode: press 'Enter' to get value, 'Esc' to exit search",
+        InputMode::Select => {
+            "Select Mode: press 'Enter' to copy to clipboard, 'd' to delete key-value, 'e' to edit value, 'Esc' to exit select"
+        }
         InputMode::Edit => "Edit Mode: press 'Esc' to exit edit",
         InputMode::AddKey | InputMode::AddValue => "press 'Esc' to exit add",
     };
