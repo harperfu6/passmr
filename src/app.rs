@@ -12,6 +12,7 @@ pub enum InputMode {
     Normal,
     Search,
     Select,
+    Edit,
     AddKey,
     AddValue,
 }
@@ -94,7 +95,11 @@ impl App {
         let target_key_list: Vec<String> = self
             .key_list
             .iter()
-            .filter(|key| key.contains(&self.search_input))
+            .filter(|key| {
+                let key_lower = key.to_lowercase();
+                let search_input_lower = self.search_input.to_lowercase();
+                key_lower.contains(&search_input_lower)
+            })
             .map(|key| key.to_owned())
             .collect();
         self.target_key_list = StatefulList::with_items(target_key_list);
@@ -154,6 +159,7 @@ impl App {
             InputMode::Search => new_cursor_position.clamp(0, self.search_input.len()),
             InputMode::AddKey => new_cursor_position.clamp(0, self.key_input.len()),
             InputMode::AddValue => new_cursor_position.clamp(0, self.value_input.len()),
+            InputMode::Edit => new_cursor_position.clamp(0, self.value_input.len()),
             _ => 0,
         }
     }
@@ -168,7 +174,7 @@ impl App {
                 self.key_input.insert(self.cursor_position, c);
                 self.move_cursor_right();
             }
-            InputMode::AddValue => {
+            InputMode::AddValue | InputMode::Edit => {
                 self.value_input.insert(self.cursor_position, c);
                 self.move_cursor_right();
             }
@@ -190,7 +196,7 @@ impl App {
                     self.move_cursor_left();
                 }
             }
-            InputMode::AddValue => {
+            InputMode::AddValue | InputMode::Edit => {
                 if self.cursor_position > 0 {
                     self.value_input.remove(self.cursor_position - 1);
                     self.move_cursor_left();
@@ -247,21 +253,42 @@ pub fn run_app<B: Backend>(
                     KeyCode::Esc => {
                         app.mode = InputMode::Normal;
                     }
-                    KeyCode::Char('j') => {
+                    KeyCode::Char('j') | KeyCode::Down => {
                         app.target_key_list.next();
                     }
-                    KeyCode::Char('k') => {
+                    KeyCode::Char('k') | KeyCode::Up => {
                         app.target_key_list.previous();
                     }
                     KeyCode::Char('d') => {
                         app.remove_from_kvs(kvs);
                         app.mode = InputMode::Search;
                     }
+                    KeyCode::Char('e') => {
+                        app.cursor_position = app.value_input.len();
+                        app.mode = InputMode::Edit;
+                    }
                     KeyCode::Enter => {
                         let selected_key = app.get_selected_key();
                         let value = kvs.get(&selected_key.unwrap());
                         let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
                         ctx.set_contents(value.unwrap()).unwrap();
+                    }
+                    _ => {}
+                },
+                InputMode::Edit => match key.code {
+                    KeyCode::Esc => {
+                        app.mode = InputMode::Select;
+                    }
+                    KeyCode::Backspace => {
+                        app.delete_char();
+                    }
+                    KeyCode::Enter => {
+                        app.key_input = app.get_selected_key().unwrap();
+                        app.add_to_kvs(kvs);
+                        app.mode = InputMode::Select;
+                    }
+                    KeyCode::Char(to_insert) => {
+                        app.enter_char(to_insert);
                     }
                     _ => {}
                 },
