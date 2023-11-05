@@ -5,5 +5,4 @@ sudo apt install xorg-dev libxcb-composite0-dev
 ```
 
 # TODO
-- 追加したときに一定時間「Key Value Added!」を表示
-- コピーしたときに一定時間「Value Coppied!」を表示
+- モードが多いので左右のウィンドウに分けた方がいいかも

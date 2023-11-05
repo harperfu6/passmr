@@ -5,14 +5,24 @@ use crate::app::StatefulList;
 use crate::app::{App, InputMode};
 use crate::kvs::Kvs;
 
-fn text_area(string: String, frame: &mut Frame, area: &Rect) {
-    let mut text = Text::from(Line::from(string));
-    let style = Style::default()
-        .fg(Color::Yellow)
-        .add_modifier(Modifier::ITALIC);
-    text.patch_style(style);
-    let message = Paragraph::new(text);
-    frame.render_widget(message, *area);
+fn text_area(text_list: Vec<&str>, frame: &mut Frame, area: &Rect, is_warning: bool) {
+    let text = text_list
+        .into_iter()
+        .map(|t| t.into())
+        .collect::<Vec<Line>>();
+    if is_warning {
+        frame.render_widget(
+            Paragraph::new(text)
+                .style(Style::default().fg(Color::LightMagenta))
+                .block(Block::default().borders(Borders::ALL)),
+            *area,
+        );
+    } else {
+        frame.render_widget(
+            Paragraph::new(text).block(Block::default().borders(Borders::ALL)),
+            *area,
+        );
+    }
 }
 
 fn str_widget_area(
@@ -81,7 +91,7 @@ pub fn ui(frame: &mut Frame, app: &mut App, kvs: &mut Kvs) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(1),
+            Constraint::Length(9),
             Constraint::Length(3),
             Constraint::Length(30),
             Constraint::Length(1),
@@ -89,18 +99,52 @@ pub fn ui(frame: &mut Frame, app: &mut App, kvs: &mut Kvs) {
         .split(frame.size());
 
     let mode_text = match app.mode {
-        InputMode::Normal => "Normal Mode: press 's' to search, 'a' to add, 'q' to quit",
-        InputMode::Search => "Search Mode: press 'Enter' to get value, 'Esc' to exit search",
-        InputMode::Select => {
-            "Select Mode: press 'Enter' to copy to clipboard, 'd' to delete key-value, 'e' to edit value, 'Esc' to exit select"
-        }
-        InputMode::Edit => "Edit Mode: press 'Esc' to exit edit",
-        InputMode::AddKey | InputMode::AddValue => "press 'Esc' to exit add",
+        InputMode::Home => vec![
+            "=========================",
+            "   Welcome to passmr!   ",
+            "=========================",
+            "- press 's' to search",
+            "- press 'a' to add",
+            "- press 'q' to quit",
+        ],
+        InputMode::Search => vec![
+            "Search Mode:",
+            "- press 'Enter' to get value",
+            "- press 'Esc' to exit search mode",
+        ],
+        InputMode::Select => vec![
+            "Select Mode:",
+            "- press 'Enter' to copy to clipboard",
+            "- press 'j' to move down",
+            "- press 'k' to move up",
+            "- press 'e' to edit value",
+            "- press 'd' to delete key-value",
+            "- press 'Esc' to exit select mode",
+        ],
+        InputMode::Delete => vec!["press 'y' to delete", "press 'Esc' to cancel"],
+        InputMode::Edit => vec![
+            "Edit Mode:",
+            "- press 'Enter' to save",
+            "- press 'Esc' to exit edit mode",
+        ],
+        InputMode::AddKey => vec![
+            "Add Key-Value Mode:",
+            "- press 'Enter' to add value",
+            "- press 'Esc' to exit add key-value mode",
+        ],
+        InputMode::AddValue => vec![
+            "Add Key-Value Mode:",
+            "- press 'Enter' to save",
+            "- press 'Esc' to exit add key-value mode",
+        ],
     };
-    text_area(mode_text.to_string(), frame, &chunks[0]);
+    match app.mode {
+        InputMode::Delete => text_area(mode_text, frame, &chunks[0], true),
+        _ => text_area(mode_text, frame, &chunks[0], false),
+    };
 
     match app.mode {
-        InputMode::Normal => {}
+        InputMode::Home => {}
         InputMode::Search => {
             str_widget_area(
                 app.search_input.clone(),
@@ -136,6 +180,13 @@ pub fn ui(frame: &mut Frame, app: &mut App, kvs: &mut Kvs) {
                     &chunks[3],
                     true,
                 );
+            }
+        }
+        InputMode::Delete => {
+            if let Some(key) = app.get_selected_key() {
+                str_widget_area(key.clone(), "Key", frame, app, &chunks[2], false);
+                let value = kvs.get(key.as_str()).unwrap();
+                str_widget_area(value.clone(), "Value", frame, app, &chunks[3], false);
             }
         }
         InputMode::AddKey => {
