@@ -33,7 +33,7 @@ impl Kvs {
             .collect()
     }
 
-    pub fn delete(&self, key: String) {
+    pub fn delete(&self, key: &str) {
         self.db.remove(key).unwrap();
     }
 }

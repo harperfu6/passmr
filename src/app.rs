@@ -68,7 +68,7 @@ pub struct App {
     /// list of stored keys
     pub key_list: Vec<String>,
     /// list of search target keys
-    pub target_key_list: StatefulList<String>,
+    pub stateful_key_list: StatefulList<String>,
     /// key input in add mode
     pub key_input: String,
     /// value input in add mode
@@ -85,15 +85,15 @@ impl App {
             search_input: String::new(),
             key_input: String::new(),
             key_list: vec![],
-            target_key_list: StatefulList::with_items(vec![]),
+            stateful_key_list: StatefulList::with_items(vec![]),
             value_input: String::new(),
             cursor_position: 0,
             mode: InputMode::Home,
         }
     }
 
-    pub fn get_target_key_list(&mut self) -> Vec<String> {
-        let target_key_list: Vec<String> = self
+    pub fn get_search_key_list(&mut self) -> Vec<String> {
+        let search_key_list: Vec<String> = self
             .key_list
             .iter()
             .filter(|key| {
@@ -103,16 +103,18 @@ impl App {
             })
             .map(|key| key.to_owned())
             .collect();
-        self.target_key_list = StatefulList::with_items(target_key_list);
-        self.target_key_list.items.to_owned()
+        self.stateful_key_list = StatefulList::with_items(search_key_list.clone()); // required to
+                                                                                    // initialize
+                                                                                    // stateful_key_list
+        search_key_list
     }
 
-    pub fn get_target_statefule_list(&mut self) -> StatefulList<String> {
-        self.target_key_list.to_owned()
+    pub fn get_statefule_list(&mut self) -> StatefulList<String> {
+        self.stateful_key_list.to_owned()
     }
 
-    pub fn get_mut_key_list(&mut self) -> &mut StatefulList<String> {
-        &mut self.target_key_list
+    pub fn get_mut_stateful_key_list(&mut self) -> &mut StatefulList<String> {
+        &mut self.stateful_key_list
     }
 
     pub fn sync_key_list(&mut self, key_list: Vec<String>) {
@@ -120,15 +122,15 @@ impl App {
     }
 
     pub fn get_selected_key(&self) -> Option<String> {
-        match self.target_key_list.state.selected() {
-            Some(i) => Some(self.target_key_list.items[i].to_owned()),
+        match self.stateful_key_list.state.selected() {
+            Some(i) => Some(self.stateful_key_list.items[i].to_owned()),
             None => None,
         }
     }
 
     fn remove_from_kvs(&mut self, kvs: &Kvs) {
         if let Some(key) = self.get_selected_key() {
-            kvs.delete(key);
+            kvs.delete(key.as_str());
             self.sync_key_list(kvs.get_key_vec());
         }
     }
@@ -240,9 +242,9 @@ pub fn run_app<B: Backend>(
                         app.delete_char();
                     }
                     KeyCode::Enter => {
-                        if app.target_key_list.items.len() > 0 {
+                        if app.stateful_key_list.items.len() > 0 {
                             app.mode = InputMode::Select;
-                            app.target_key_list.state.select(Some(0));
+                            app.stateful_key_list.state.select(Some(0));
                         }
                         app.search_input.clear();
                     }
@@ -258,10 +260,10 @@ pub fn run_app<B: Backend>(
                         app.cursor_position = 0;
                     }
                     KeyCode::Char('j') | KeyCode::Down => {
-                        app.target_key_list.next();
+                        app.stateful_key_list.next();
                     }
                     KeyCode::Char('k') | KeyCode::Up => {
-                        app.target_key_list.previous();
+                        app.stateful_key_list.previous();
                     }
                     KeyCode::Char('d') => {
                         app.mode = InputMode::Delete;

@@ -5,4 +5,4 @@ sudo apt install xorg-dev libxcb-composite0-dev
 ```
 
 # TODO
-- モードが多いので左右のウィンドウに分けた方がいいかも
+- Macで動作確認し、キーストローク付きgifアニメ作る

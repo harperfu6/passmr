@@ -83,7 +83,7 @@ fn stateful_list_widget_area(
         .highlight_style(Style::default().add_modifier(Modifier::BOLD))
         .highlight_symbol(">> ");
 
-    let mut_key_list = app.get_mut_key_list();
+    let mut_key_list = app.get_mut_stateful_key_list();
     frame.render_stateful_widget(ui_key_list, *area, &mut mut_key_list.state);
 }
 
@@ -154,16 +154,10 @@ pub fn ui(frame: &mut Frame, app: &mut App, kvs: &mut Kvs) {
                 &chunks[1],
                 true,
             );
-            str_list_widget_area(app.get_target_key_list(), "Key", frame, app, &chunks[2]);
+            str_list_widget_area(app.get_search_key_list(), "Key", frame, app, &chunks[2]);
         }
         InputMode::Select => {
-            stateful_list_widget_area(
-                app.get_target_statefule_list(),
-                "Key",
-                frame,
-                app,
-                &chunks[2],
-            );
+            stateful_list_widget_area(app.get_statefule_list(), "Key", frame, app, &chunks[2]);
             if let Some(key) = app.get_selected_key() {
                 let value = kvs.get(key.as_str()).unwrap();
                 str_widget_area(value.clone(), "Value", frame, app, &chunks[3], false);
