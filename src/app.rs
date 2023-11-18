@@ -1,6 +1,6 @@
 use std::io;
 
-use clipboard::{ClipboardContext, ClipboardProvider};
+use cli_clipboard::{ClipboardContext, ClipboardProvider};
 use crossterm::event::{self, Event, KeyCode};
 use ratatui::prelude::*;
 use ratatui::widgets::*;
