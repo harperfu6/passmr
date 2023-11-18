@@ -1,7 +1,54 @@
 # passmr
-Note: On Linux, you'll need to have xorg-dev and libxcb-composite0-dev to compile. 
+A lightweight CLI tool for managing key-value.
+
+# Install
+
+# How to use passmr
+
+**launch passmr**
+```
+$ passmr
+```
+
+## Mode
+- add mode: add key-value
+- search mode: search key
+	- select mode: select key, then copy/delete/edit value
+
+press 'q' to quit.
+
+## add mode
+You can add new key-value. Press 'a' to enter add mode.
+
+All key-values are stored in `$HOME/.passmr/kvs` dir in default.
+You can also create another KVS by (temporarily) moving the folder as `mv $HOME/.passmr/kvs $HOME/.passmr/kvs-old`.
+
+## search mode
+You can search key-value you added. Press 's' to enter search mode.
+
+### select mode
+In search window, press any word you want to search, then press 'Enter' to enter select mode.
+
+You can select key by ↑/↓ or k/j.
+
+**copy value**
+
+You can copy value of key you select. Press 'Enter' to copy (to clipboard!).
+
+**delete key-value**
+
+You can delete key (and value) you select. Press 'd' to delete.
+
+**edit key-value**
+
+You can edit (only) value of key you select.  Press 'e' to edit.
+
+NOTE: If you want to edit a key, you need to delete it and re-add it.
+
+# Note
+On Linux, you'll need to install xorg-dev and libxcb-composite0-dev to compile. 
 ```
 sudo apt install xorg-dev libxcb-composite0-dev
 ```
 
-# TODO
+# Todo
