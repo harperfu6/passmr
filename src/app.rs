@@ -302,6 +302,12 @@ pub fn run_app<B: Backend>(
                         app.search_input.clear();
                         app.cursor_position = 0;
                     }
+                    KeyCode::Left => {
+                        app.move_cursor_left();
+                    }
+                    KeyCode::Right => {
+                        app.move_cursor_right();
+                    }
                     KeyCode::Char(to_insert) => {
                         app.enter_char(to_insert);
                     }
