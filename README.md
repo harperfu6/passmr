@@ -2,6 +2,18 @@
 A lightweight CLI tool for managing key-value.
 
 # Install
+1. Install binary from [v1.1.0 release](https://github.com/harperfu6/passmr/releases/tag/v1.1.0)
+- Linux: passmr_v1.1.0_x86_64-unknown-linux-musl.tar.gz
+- Mac OS: passmr_v1.1.0_x86_64-apple-darwin.zip
+2. decompress file, then move binary to a $PATH dir.
+
+e.g. (Linux ver)
+```
+$ tar -xzvf passmr_v1.1.0_x86_64-unknown-linux-musl.tar.gz
+$ mv passmr $HOME/.local/bin/
+```
+
+NOTE: For Mac OS ver, you have to permit "Allow Anyway" from "Security & Privacy" Setting.
 
 # How to use passmr
 
@@ -20,7 +32,7 @@ press 'q' to quit.
 ## add mode
 You can add new key-value. Press 'a' to enter add mode.
 
-All key-values are stored in `$HOME/.passmr/kvs` dir in default.
+NOTE: All key-values are stored in `$HOME/.passmr/kvs` dir.
 You can also create another KVS by (temporarily) moving the folder as `mv $HOME/.passmr/kvs $HOME/.passmr/kvs-old`.
 
 ## search mode
