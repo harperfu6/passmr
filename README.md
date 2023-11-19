@@ -31,6 +31,7 @@ press 'q' to quit.
 
 ## add mode
 You can add new key-value. Press 'a' to enter add mode.
+![](https://github.com/harperfu6/passmr/blob/main/gif/passmr_add_key.gif)
 
 NOTE: All key-values are stored in `$HOME/.passmr/kvs` dir.
 You can also create another KVS by (temporarily) moving the folder as `mv $HOME/.passmr/kvs $HOME/.passmr/kvs-old`.
@@ -46,19 +47,22 @@ You can select key by ↑/↓ or k/j.
 **copy value**
 
 You can copy value of key you select. Press 'Enter' to copy (to clipboard!).
+![](https://github.com/harperfu6/passmr/blob/main/gif/passmr_copy_value.gif)
 
 **delete key-value**
 
 You can delete key (and value) you select. Press 'd' to delete.
+![](https://github.com/harperfu6/passmr/blob/main/gif/passmr_delete_key.gif)
 
 **edit key-value**
 
 You can edit (only) value of key you select.  Press 'e' to edit.
+![](https://github.com/harperfu6/passmr/blob/main/gif/passmr_edit_value.gif)
 
 NOTE: If you want to edit a key, you need to delete it and re-add it.
 
 # Note
-On Linux, you'll need to install xorg-dev and libxcb-composite0-dev to compile. 
+On Linux, you'll need to install xorg-dev and libxcb-composite0-dev to use clipboard. ([Ref](https://github.com/allie-wake-up/cli-clipboard))
 ```
 sudo apt install xorg-dev libxcb-composite0-dev
 ```
