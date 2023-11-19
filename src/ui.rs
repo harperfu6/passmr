@@ -80,7 +80,11 @@ fn stateful_list_widget_area(
         .collect::<Vec<ListItem>>();
     let ui_key_list = List::new(list_items)
         .block(Block::default().borders(Borders::ALL).title(title))
-        .highlight_style(Style::default().add_modifier(Modifier::BOLD))
+        .highlight_style(
+            Style::default()
+                .fg(Color::Yellow)
+                .add_modifier(Modifier::BOLD),
+        )
         .highlight_symbol(">> ");
 
     let mut_key_list = app.get_mut_stateful_key_list();
