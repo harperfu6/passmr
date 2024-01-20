@@ -79,6 +79,7 @@ pub struct App {
     pub mode: InputMode,
 }
 
+
 impl App {
     pub fn new() -> Self {
         Self {
@@ -245,8 +246,9 @@ pub fn run_app<B: Backend>(
                         if app.stateful_key_list.items.len() > 0 {
                             app.mode = InputMode::Select;
                             app.stateful_key_list.state.select(Some(0));
+                            app.search_input.clear();
+                            app.cursor_position = 0;
                         }
-                        app.search_input.clear();
                     }
                     KeyCode::Char(to_insert) => {
                         app.enter_char(to_insert);
