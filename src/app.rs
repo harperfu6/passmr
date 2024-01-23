@@ -1,6 +1,7 @@
 use std::io;
 
-use cli_clipboard::{ClipboardContext, ClipboardProvider};
+use arboard::Clipboard;
+
 use crossterm::event::{self, Event, KeyCode};
 use ratatui::prelude::*;
 use ratatui::widgets::*;
@@ -78,7 +79,6 @@ pub struct App {
     /// current mode of the app
     pub mode: InputMode,
 }
-
 
 impl App {
     pub fn new() -> Self {
@@ -282,8 +282,9 @@ pub fn run_app<B: Backend>(
                         // copy to clipboard
                         let selected_key = app.get_selected_key();
                         let value = kvs.get(&selected_key.unwrap());
-                        let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
-                        ctx.set_contents(value.unwrap()).unwrap();
+                        let mut clipboard = Clipboard::new().unwrap();
+                        clipboard.set_text(value.unwrap()).unwrap();
+                        std::thread::sleep(std::time::Duration::from_secs(3));
                     }
                     _ => {}
                 },
